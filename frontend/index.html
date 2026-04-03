@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>OS Lab IDE</title>
+<style>
+body { background:#0d1117; color:white; font-family:sans-serif; }
+.sidebar { width:200px; float:left; }
+.file { cursor:pointer; padding:5px; }
+.file:hover { background:#222; }
+textarea { width:70%; height:300px; background:black; color:#0f0; }
+#output { background:black; margin-top:10px; padding:10px; }
+</style>
+</head>
+
+<body>
+
+<div class="sidebar" id="files"></div>
+
+<textarea id="code"></textarea><br>
+<button onclick="runCode()">▶ Run</button>
+
+<div id="output">Output...</div>
+
+<script>
+const repo = "GLX-X/os-online";
+const folder = "OS_Programs";
+
+// 📂 Load files from GitHub
+async function loadFiles() {
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${folder}`);
+    const data = await res.json();
+
+    let html = "";
+    data.forEach(f => {
+        html += `<div class="file" onclick="openFile('${f.download_url}')">${f.name}</div>`;
+    });
+
+    document.getElementById("files").innerHTML = html;
+}
+
+// 📄 Open file
+async function openFile(url) {
+    const res = await fetch(url);
+    const code = await res.text();
+    document.getElementById("code").value = code;
+}
+
+// ▶ Run code
+async function runCode() {
+    const code = document.getElementById("code").value;
+
+    const res = await fetch("YOUR_RENDER_URL/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code })
+    });
+
+    const data = await res.json();
+    document.getElementById("output").innerText = data.output;
+}
+
+loadFiles();
+</script>
+
+</body>
+</html>
